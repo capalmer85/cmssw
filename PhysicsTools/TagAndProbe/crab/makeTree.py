@@ -50,6 +50,12 @@ varOptions.register(
     "switch to run other AOD (for RECO SFs)"
     )
 
+varOptions.register(
+    "HLTname", "HLT",
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.string,
+    "HLT process name (default HLT)"
+    )
 
 varOptions.parseArguments()
 
@@ -61,7 +67,7 @@ varOptions.parseArguments()
 options = dict()
 options['useAOD']               = cms.bool(varOptions.isAOD)
 
-options['HLTProcessName']       = "HLT"
+options['HLTProcessName']       = varOptions.HLTname
 
 ### set input collections
 options['ELECTRON_COLL']        = "slimmedElectrons"
@@ -92,7 +98,7 @@ if (varOptions.isMC):
     options['TnPPATHS']            = cms.vstring("HLT*")
     options['TnPHLTTagFilters']    = cms.vstring()
     options['TnPHLTProbeFilters']  = cms.vstring()
-    options['HLTFILTERTOMEASURE']  = cms.vstring("")
+    options['HLTFILTERTOMEASURE']  = cms.vstring("hltEle27erWPLooseGsfTrackIsoFilter")
     options['GLOBALTAG']           = 'auto:run2_mc'
     options['EVENTSToPROCESS']     = cms.untracked.VEventRange()
 else:
@@ -108,9 +114,9 @@ else:
 ## Inputs for test
 ###################################################################
 filesMC =  cms.untracked.vstring(
-    '/store/mc/RunIISpring16MiniAODv1/DYToEE_NNPDF30_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/00271303-C80D-E611-A98C-0002C94D552A.root',
-    '/store/mc/RunIISpring16MiniAODv1/DYToEE_NNPDF30_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/026FA9AF-DB0D-E611-9CFB-A0000420FE80.root',
-    '/store/mc/RunIISpring16MiniAODv1/DYToEE_NNPDF30_13TeV-powheg-pythia8/MINIAODSIM/PUSpring16_80X_mcRun2_asymptotic_2016_v3-v1/00000/02FEA941-F10D-E611-BB9E-A0000420FE80.root',
+'/store/mc/RunIISpring16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/20000/00071E92-6F55-E611-B68C-0025905A6066.root',
+'/store/mc/RunIISpring16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/20000/00384BBA-D455-E611-B32C-0CC47A4D7600.root',
+'/store/mc/RunIISpring16MiniAODv2/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/PUSpring16RAWAODSIM_reHLT_80X_mcRun2_asymptotic_v14_ext1-v1/20000/00684732-3155-E611-B794-0CC47A4D7640.root',
     )
 
 filesData =  cms.untracked.vstring( 
@@ -211,6 +217,7 @@ if (options['DoPhoID']):
     print "  -- Producing photon SF tree      -- "
 
 if (options['DoTrigger']):
+    process.cand_sequence += process.ele_sequence
     process.cand_sequence += process.hlt_sequence
     print "  -- Producing HLT efficiency tree -- "
 
@@ -335,7 +342,7 @@ if (varOptions.isMC):
         process.allTagsAndProbes +
         process.pileupReweightingProducer +
         process.mc_sequence +
-        process.eleVarHelper +
+        #process.eleVarHelper +
         process.tree_sequence
         )
 else:
@@ -353,3 +360,5 @@ process.TFileService = cms.Service(
     "TFileService", fileName = cms.string(options['OUTPUT_FILE_NAME']),
     closeFileFast = cms.untracked.bool(True)
     )
+
+
